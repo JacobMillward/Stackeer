@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Immutable;
-using Stackeer.Test.Messages;
 
 namespace Stackeer.Test.Handlers
 {
-    public class NoopHandler<T> : MessageHandler<T> where T : IMessage
+    public class PassthroughHandler<T, R> : MessageHandler<T> where T : IMessage where R : IMessage, new()
     {
         public Action<T> Callback { get; set; } = _ => { };
 
-        public NoopHandler()
+        public PassthroughHandler()
         {
         }
 
-        public NoopHandler(Action<T> callback)
+        public PassthroughHandler(Action<T> callback)
         {
             Callback = callback;
         }
@@ -20,8 +19,7 @@ namespace Stackeer.Test.Handlers
         public override ImmutableArray<IMessage>? Process(T input)
         {
             Callback(input);
-
-            return null;
+            return ImmutableArray.Create<IMessage>(new R());
         }
     }
 }
