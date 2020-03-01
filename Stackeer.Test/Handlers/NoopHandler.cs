@@ -8,11 +8,11 @@ namespace Stackeer.Test.Handlers
     {
         public Action<DummyMessage> Callback { get; set; } = _ => { };
 
-        public override ImmutableArray<IMessage> Process(DummyMessage input)
+        public override ImmutableArray<IMessage>? Process(DummyMessage input)
         {
             Callback(input);
 
-            return ImmutableArray.Create<IMessage>();
+            return null;
         }
     }
 }

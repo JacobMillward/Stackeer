@@ -20,7 +20,13 @@ namespace Stackeer
 
                 var handler = GetProcessor(msg);
 
-                foreach (var outputMsg in handler.Process(msg))
+                var output = handler.Process(msg);
+                if (output is null)
+                {
+                    continue;
+                }
+
+                foreach (var outputMsg in output)
                 {
                     MessageStack.Push(outputMsg);
                 }
