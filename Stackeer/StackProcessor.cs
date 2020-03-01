@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Stackeer.Errors;
 
 namespace Stackeer
 {
@@ -18,17 +19,33 @@ namespace Stackeer
             {
                 var msg = MessageStack.Pop();
 
-                var handler = GetProcessor(msg);
-
-                var output = handler.Process(msg);
-                if (output is null)
+                if (msg is Error error)
                 {
-                    continue;
+                    if (error.ShouldContinue)
+                    {
+                        continue;
+                    }
+
+                    throw new StackProcessorException(error);
                 }
 
-                foreach (var outputMsg in output)
+                var handler = GetProcessor(msg);
+                try
                 {
-                    MessageStack.Push(outputMsg);
+                    var output = handler.Process(msg);
+                    if (output is null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var outputMsg in output)
+                    {
+                        MessageStack.Push(outputMsg);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageStack.Push(new Error(innerException: ex));
                 }
             }
         }

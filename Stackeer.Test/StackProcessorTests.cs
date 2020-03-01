@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using Stackeer.Errors;
 using Stackeer.Test.Handlers;
 using Stackeer.Test.Messages;
 using Xunit;
@@ -66,6 +67,21 @@ namespace Stackeer.Test
                 processor1.GetType().FullName,
                 processor2.GetType().FullName,
                 processor3.GetType().FullName);
+        }
+
+        [Fact]
+        public void StackProcessor_WhenProcessorThrows_ThrowsStackProcessorException()
+        {
+            var processor = new StackProcessor();
+            var expectedInnerException = new Exception("Test Exception");
+
+            processor.RegisterHandler(new NoopHandler<DummyMessage>(_ => throw expectedInnerException));
+
+            processor.AddMessage(new DummyMessage());
+
+            processor.Invoking(x => x.ProcessMessages())
+                .Should().ThrowExactly<StackProcessorException>()
+                .Where(ex => ex.InnerException == expectedInnerException);
         }
     }
 }
